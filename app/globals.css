@@ -133,5 +133,87 @@ footer { text-align: center; padding: 22px; color: var(--muted); font: .85rem sy
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Shared motion and depth across the customer flow and chef dashboard. */
+body { background: radial-gradient(ellipse at 8% 0%, #fffaf2 0, transparent 35rem), var(--bg); }
+button { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease, color .18s ease, filter .18s ease; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid #c4472b55; outline-offset: 2px; }
+.site-header { isolation: isolate; overflow: hidden; background: linear-gradient(180deg, #fffdf89c, transparent); animation: header-in .65s cubic-bezier(.2,.7,.2,1) both; }
+.site-header::before { position: absolute; z-index: -1; top: -110px; left: 50%; width: min(70vw, 570px); height: 240px; border-radius: 50%; background: #eebc7930; filter: blur(30px); content: ""; transform: translateX(-50%); }
+.site-header h1 { animation: title-in .6s .08s both; }
+.site-header p { animation: fade-in .55s .2s both; }
+.admin-open { box-shadow: 0 4px 14px #49311c0b; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, color .18s ease; }
+.admin-open:hover, .secondary:hover { transform: translateY(-2px); box-shadow: 0 7px 18px #49311c12; }
+.customer-main { animation: rise-in .5s .1s both; }
+.menu-section { animation: rise-in .5s both; }
+.menu-section:nth-of-type(2) { animation-delay: .07s; }
+.menu-section:nth-of-type(3) { animation-delay: .14s; }
+.menu-section:nth-of-type(4) { animation-delay: .21s; }
+.menu-section h2 { position: relative; }
+.menu-section h2::after { display: block; width: 42px; height: 3px; margin-top: 5px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), #e8a56c); content: ""; transform-origin: left; animation: line-grow .45s .18s both; }
+.item { padding-inline: 10px; border-radius: 11px; transition: background .18s ease, transform .18s ease, border-color .18s ease; }
+.item:hover { transform: translateX(4px); background: linear-gradient(100deg, #fff9f0, #fffdf899); }
+.item b { transition: color .18s ease; }
+.item:hover b { color: var(--accent); }
+.qty button:hover { transform: scale(1.08); box-shadow: 0 4px 12px #c4472b26; }
+.qty button:active, .tile:active, .primary:active { transform: scale(.96); }
+.qty span { transition: transform .15s ease, color .15s ease; }
+.order-box { position: relative; overflow: hidden; transition: transform .22s ease, box-shadow .22s ease; animation: rise-in .55s .24s backwards; }
+.order-box::before { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--accent), #e9b36d, var(--green)); content: ""; }
+.order-box:hover { transform: translateY(-3px); box-shadow: 0 18px 42px #49311c18; }
+.summary li { animation: fade-in .2s both; }
+.summary li:nth-child(2) { animation-delay: .025s; }
+.summary li:nth-child(3) { animation-delay: .05s; }
+.summary li:nth-child(4) { animation-delay: .075s; }
+.tile { transition: transform .18s ease, border-color .18s ease, color .18s ease, background .18s ease, box-shadow .18s ease; }
+.tile:hover { transform: translateY(-2px); box-shadow: 0 6px 15px #49311c12; }
+.tile.sel { box-shadow: 0 6px 15px #c4472b2b; }
+input, textarea, select { transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+input:focus, textarea:focus, select:focus { border-color: #c4472b99; background: #fffdfb; box-shadow: 0 0 0 4px #c4472b12; outline: none; }
+.primary { background: linear-gradient(105deg, #c4472b, #ad3825); box-shadow: 0 7px 16px #c4472b26; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+.primary:hover { transform: translateY(-2px); box-shadow: 0 11px 23px #c4472b33; }
+.note, footer { animation: fade-in .65s .3s both; }
+.modal { animation: overlay-in .2s ease both; backdrop-filter: blur(4px); }
+.box { animation: modal-in .32s cubic-bezier(.2,.8,.2,1) both; }
+.box .ok { display: inline-block; animation: success-pop .4s .12s both; }
+.status-text { transition: color .2s ease; }
+.chef-panel { animation: panel-in .25s ease both; background-image: radial-gradient(ellipse at 90% 0%, #f1d7b633, transparent 34rem); }
+.chef-header { backdrop-filter: blur(14px); background: #fffdf8ed; }
+.chef-header h1 { animation: fade-in .3s both; }
+.chef-main { animation: rise-in .38s .04s both; }
+.login-wrap { animation: modal-in .35s cubic-bezier(.2,.8,.2,1) both; }
+.stat, .panel-card, .order-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.stat:hover, .panel-card:hover { transform: translateY(-3px); border-color: #d9c5aa; box-shadow: 0 16px 34px #49311c17; }
+.stat { animation: card-in .4s backwards; }
+.stat:nth-child(2) { animation-delay: .06s; }
+.stat:nth-child(3) { animation-delay: .12s; }
+.stat strong { transition: color .18s ease, transform .18s ease; }
+.stat:hover strong { color: var(--accent); transform: scale(1.04); transform-origin: left; }
+.order-card { animation: card-in .38s backwards; }
+.orders-grid .order-card:nth-child(2) { animation-delay: .06s; }
+.orders-grid .order-card:nth-child(3) { animation-delay: .12s; }
+.order-card:hover { transform: translateY(-3px); border-color: #ddc8ae; box-shadow: 0 16px 32px #49311c16; }
+.delivered-btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+.delivered-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 16px #287a522c; }
+.badge { transition: transform .18s ease, background .18s ease; animation: badge-in .24s both; }
+.dish-row { animation: rise-in .32s backwards; }
+.dish-row:nth-child(2) { animation-delay: .025s; }
+.dish-row:nth-child(3) { animation-delay: .05s; }
+.dish-row:nth-child(4) { animation-delay: .075s; }
+.management .panel-card:nth-child(2) { animation-delay: .07s; }
+.empty { background: #fffdf86b; animation: fade-in .35s both; }
+.form-message { transition: color .18s ease; }
+
+@keyframes header-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes title-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes card-in { from { opacity: 0; transform: translateY(9px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes line-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes success-pop { 0% { opacity: 0; transform: scale(.6) rotate(-8deg); } 70% { opacity: 1; transform: scale(1.12) rotate(2deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes panel-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes badge-in { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
