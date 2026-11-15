@@ -92,6 +92,22 @@ footer { text-align: center; padding: 22px; color: var(--muted); font: .85rem sy
 .dish-row:last-child { border-bottom: 0; }
 .dish-row small { display: block; color: var(--muted); }
 .dish-actions { display: flex; align-items: center; gap: 8px; }
+.dish-list-heading { margin-top: 30px; }
+.dish-count { padding: 5px 10px; border: 1px solid #e8dccb; border-radius: 999px; background: #fffdf8; color: #7a6a5a; font-size: .78rem; font-weight: 700; letter-spacing: .02em; }
+.dish-list { overflow: hidden; padding: 8px; }
+.dish-row { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 13px 12px; border-bottom: 1px solid #eee4d7; border-radius: 11px; animation: dish-row-in .28s ease both; transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
+.dish-row:hover { z-index: 1; transform: translateX(3px); background: linear-gradient(100deg, #fff5e9, #fffdf8 72%); box-shadow: 0 5px 16px #49311c0d; }
+.dish-row:last-child { border-bottom-color: transparent; }
+.dish-row strong { display: block; font-size: .96rem; }
+.dish-row small { display: block; margin-top: 2px; color: var(--muted); font-size: .78rem; }
+.dish-actions { flex-wrap: wrap; justify-content: flex-end; }
+.dish-actions .secondary, .delete-btn { min-height: 36px; padding: 7px 11px; transition: transform .16s ease, border-color .16s ease, background .16s ease, color .16s ease, box-shadow .16s ease; }
+.dish-actions .secondary:hover, .delete-btn:hover { transform: translateY(-1px); }
+.delete-btn { border: 1px solid #f0c7c1; border-radius: 9px; background: #fff7f5; color: #a33126; font: 650 .86rem system-ui, sans-serif; }
+.delete-btn:hover { border-color: #d88f84; background: #ffebe7; color: #8e231a; box-shadow: 0 4px 12px #a3312618; }
+.delete-btn:focus-visible, .dish-actions .secondary:focus-visible { outline: 3px solid #c4472b55; outline-offset: 2px; }
+.delete-btn:disabled, .dish-actions .secondary:disabled { transform: none; box-shadow: none; }
+@keyframes dish-row-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .badge { padding: 3px 8px; border-radius: 99px; background: #287a5217; color: var(--green); font-size: .75rem; font-weight: 700; }
 .badge.off { background: #c4472b17; color: var(--accent); }
 .history .order-card { opacity: .83; }
@@ -111,6 +127,9 @@ footer { text-align: center; padding: 22px; color: var(--muted); font: .85rem sy
   .stat strong { font-size: 1.25rem; }
   .stat span { font-size: .76rem; }
   .management, .form-row { grid-template-columns: 1fr; }
+  .dish-row { align-items: flex-start; }
+  .dish-actions { gap: 6px; }
+  .dish-actions .secondary, .delete-btn { padding: 7px 9px; font-size: .78rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

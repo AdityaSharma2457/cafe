@@ -315,6 +315,15 @@ export async function updateDishAvailability(idValue: string, data: Record<strin
   return { id, available: data.available };
 }
 
+export async function deleteDish(idValue: string) {
+  if (!/^\d+$/.test(idValue)) throw new CafeError("A valid dish is required.");
+  const id = Number(idValue);
+  const db = await database();
+  const result = await db.prepare("DELETE FROM dishes WHERE id = ?").bind(id).run();
+  if (result.meta.changes === 0) throw new CafeError("Dish not found.", 404);
+  return { id, deleted: true };
+}
+
 export async function newSessionToken() {
   const expiresAt = Date.now() + sessionSeconds * 1000;
   const sig = createHmac("sha256", await adminPassword()).update(String(expiresAt)).digest("base64url");

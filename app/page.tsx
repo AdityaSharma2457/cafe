@@ -87,12 +87,17 @@ export default function Home() {
   const [dishCategory, setDishCategory] = useState("");
   const [dishPrice, setDishPrice] = useState("");
   const [dishMessage, setDishMessage] = useState("");
+  const [dishActionId, setDishActionId] = useState<number | null>(null);
   const [categoryName, setCategoryName] = useState("");
   const [categoryMessage, setCategoryMessage] = useState("");
 
   const total = useMemo(
     () => [...cart.values()].reduce((sum, line) => sum + line.quantity * line.dish.price, 0),
     [cart],
+  );
+  const currentDishes = useMemo(
+    () => categories.flatMap((category) => category.dishes.map((dish) => ({ ...dish, categoryName: category.name }))),
+    [categories],
   );
 
   const loadMenu = useCallback(async () => {
@@ -285,8 +290,8 @@ export default function Home() {
     }
   }
 
-  async function toggleDish(dish: Dish, button: HTMLButtonElement) {
-    button.disabled = true;
+  async function toggleDish(dish: Dish) {
+    setDishActionId(dish.id);
     try {
       await api(`/api/admin/dishes/${dish.id}`, {
         method: "PATCH",
@@ -294,8 +299,27 @@ export default function Home() {
       });
       await refreshDashboard();
     } catch (error) {
-      button.disabled = false;
       setChefError(error instanceof Error ? error.message : "Could not update dish availability.");
+    } finally {
+      setDishActionId(null);
+    }
+  }
+
+  async function removeDish(dish: Dish) {
+    const confirmed = window.confirm(
+      `Delete ${dish.name} from the menu? Past orders will keep their saved item details.`,
+    );
+    if (!confirmed) return;
+
+    setDishActionId(dish.id);
+    setChefError("");
+    try {
+      await api(`/api/admin/dishes/${dish.id}`, { method: "DELETE" });
+      await refreshDashboard();
+    } catch (error) {
+      setChefError(error instanceof Error ? error.message : "Could not delete this dish.");
+    } finally {
+      setDishActionId(null);
     }
   }
 
@@ -457,17 +481,23 @@ export default function Home() {
                     </form>
                   </div>
                 </div>
-                <div className="section-heading"><h2>Current dishes</h2></div>
+                <div className="section-heading dish-list-heading">
+                  <h2>Current dishes</h2>
+                  <span className="dish-count">{currentDishes.length} {currentDishes.length === 1 ? "dish" : "dishes"}</span>
+                </div>
                 <div className="panel-card dish-list">
-                  {categories.flatMap((category) => category.dishes.map((dish) => ({ ...dish, categoryName: category.name }))).length === 0
+                  {currentDishes.length === 0
                     ? <p className="muted">No dishes yet. Add one above.</p>
-                    : categories.flatMap((category) => category.dishes.map((dish) => ({ ...dish, categoryName: category.name }))).map((dish) => (
+                    : currentDishes.map((dish) => (
                       <div className="dish-row" key={dish.id}>
                         <div><strong>{dish.name}</strong><small>{dish.categoryName} · {money(dish.price)}</small></div>
                         <div className="dish-actions">
                           <span className={dish.available ? "badge" : "badge off"}>{dish.available ? "Available" : "Hidden"}</span>
-                          <button className="secondary" type="button" onClick={(event) => void toggleDish(dish, event.currentTarget)}>
-                            {dish.available ? "Hide" : "Show"}
+                          <button className="secondary" type="button" disabled={dishActionId === dish.id} onClick={() => void toggleDish(dish)}>
+                            {dishActionId === dish.id ? "Saving…" : dish.available ? "Hide" : "Show"}
+                          </button>
+                          <button className="delete-btn" type="button" disabled={dishActionId === dish.id} aria-label={`Delete ${dish.name}`} onClick={() => void removeDish(dish)}>
+                            Delete
                           </button>
                         </div>
                       </div>
