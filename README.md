@@ -29,7 +29,7 @@ Open <http://localhost:3000>. Local D1 data is stored by Wrangler and is separat
 
 `wrangler.jsonc` configures the Worker, the D1 binding (`DB`), and the migration directory. Keep the Worker name, self-reference service name, D1 database name, binding, and database ID in sync with the Cloudflare resources. The D1 database ID in this file is an account resource identifier, not a secret.
 
-Set the chef password as a Cloudflare Worker secret; do not commit it:
+After the first deployment creates the Worker, set the chef password as a Cloudflare Worker secret; do not commit it:
 
 ```powershell
 npx wrangler secret put CAFE_ADMIN_PASSWORD

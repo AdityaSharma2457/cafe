@@ -46,19 +46,19 @@ INSERT INTO categories (name) VALUES
   ('Drinks'),
   ('banti');
 
-INSERT INTO dishes (category_id, name, description, price_paise)
-SELECT id, 'Margherita', 'Tomato, fresh mozzarella, basil', 24900 FROM categories WHERE name = 'Pizzas'
-UNION ALL SELECT id, 'Farmhouse', 'Onion, capsicum, mushroom, tomato', 32900 FROM categories WHERE name = 'Pizzas'
-UNION ALL SELECT id, 'Paneer Tikka', 'Spiced paneer, onion, green chutney', 34900 FROM categories WHERE name = 'Pizzas'
-UNION ALL SELECT id, 'Peppy Veggie', 'Jalapeño, corn, olives, red paprika', 33900 FROM categories WHERE name = 'Pizzas'
-UNION ALL SELECT id, 'Four Cheese', 'Mozzarella, cheddar, parmesan, gouda', 39900 FROM categories WHERE name = 'Pizzas'
-UNION ALL SELECT id, 'Penne Arrabbiata', 'Spicy tomato, garlic, chilli flakes', 22900 FROM categories WHERE name = 'Pastas'
-UNION ALL SELECT id, 'Alfredo Fettuccine', 'Creamy white sauce, mushrooms', 27900 FROM categories WHERE name = 'Pastas'
-UNION ALL SELECT id, 'Pesto Fusilli', 'Basil pesto, pine nuts, parmesan', 29900 FROM categories WHERE name = 'Pastas'
-UNION ALL SELECT id, 'Mac & Cheese', 'Baked elbow pasta, cheddar crust', 25900 FROM categories WHERE name = 'Pastas'
-UNION ALL SELECT id, 'Garlic Bread', 'Toasted, buttery, with cheese dip', 12900 FROM categories WHERE name = 'Sides'
-UNION ALL SELECT id, 'Peri-Peri Fries', 'Crispy fries, peri-peri seasoning', 11900 FROM categories WHERE name = 'Sides'
-UNION ALL SELECT id, 'Cold Coffee', 'Thick, chilled, with ice cream', 14900 FROM categories WHERE name = 'Drinks'
-UNION ALL SELECT id, 'Fresh Lime Soda', 'Sweet or salted', 8900 FROM categories WHERE name = 'Drinks'
-UNION ALL SELECT id, 'Masala Chai', 'Hot, ginger and cardamom', 5900 FROM categories WHERE name = 'Drinks'
-UNION ALL SELECT id, 'santi', '', 20000 FROM categories WHERE name = 'banti';
+INSERT INTO dishes (category_id, name, description, price_paise) VALUES
+  ((SELECT id FROM categories WHERE name = 'Pizzas'), 'Margherita', 'Tomato, fresh mozzarella, basil', 24900),
+  ((SELECT id FROM categories WHERE name = 'Pizzas'), 'Farmhouse', 'Onion, capsicum, mushroom, tomato', 32900),
+  ((SELECT id FROM categories WHERE name = 'Pizzas'), 'Paneer Tikka', 'Spiced paneer, onion, green chutney', 34900),
+  ((SELECT id FROM categories WHERE name = 'Pizzas'), 'Peppy Veggie', 'Jalapeño, corn, olives, red paprika', 33900),
+  ((SELECT id FROM categories WHERE name = 'Pizzas'), 'Four Cheese', 'Mozzarella, cheddar, parmesan, gouda', 39900),
+  ((SELECT id FROM categories WHERE name = 'Pastas'), 'Penne Arrabbiata', 'Spicy tomato, garlic, chilli flakes', 22900),
+  ((SELECT id FROM categories WHERE name = 'Pastas'), 'Alfredo Fettuccine', 'Creamy white sauce, mushrooms', 27900),
+  ((SELECT id FROM categories WHERE name = 'Pastas'), 'Pesto Fusilli', 'Basil pesto, pine nuts, parmesan', 29900),
+  ((SELECT id FROM categories WHERE name = 'Pastas'), 'Mac & Cheese', 'Baked elbow pasta, cheddar crust', 25900),
+  ((SELECT id FROM categories WHERE name = 'Sides'), 'Garlic Bread', 'Toasted, buttery, with cheese dip', 12900),
+  ((SELECT id FROM categories WHERE name = 'Sides'), 'Peri-Peri Fries', 'Crispy fries, peri-peri seasoning', 11900),
+  ((SELECT id FROM categories WHERE name = 'Drinks'), 'Cold Coffee', 'Thick, chilled, with ice cream', 14900),
+  ((SELECT id FROM categories WHERE name = 'Drinks'), 'Fresh Lime Soda', 'Sweet or salted', 8900),
+  ((SELECT id FROM categories WHERE name = 'Drinks'), 'Masala Chai', 'Hot, ginger and cardamom', 5900),
+  ((SELECT id FROM categories WHERE name = 'banti'), 'santi', '', 20000);
