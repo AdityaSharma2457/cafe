@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "opennextjs-cloudflare build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
@@ -24,5 +25,10 @@
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.9.0",
     "wrangler": "^4.162.0"
+  },
+  "overrides": {
+    "@opennextjs/cloudflare": {
+      "glob": "^14.0.2"
+    }
   }
 }

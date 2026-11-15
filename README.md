@@ -57,7 +57,7 @@ npm run preview
 npm run deploy
 ```
 
-`npm run deploy` builds through OpenNext and deploys the Worker. If Cloudflare Workers Builds deploys this repository from Git, use `npx opennextjs-cloudflare build` as the build command and `npx wrangler deploy` as the deploy command. Configure `CAFE_ADMIN_PASSWORD` as a Worker secret with `wrangler secret put` or in the Worker's secret settings. Do not use `npm run build` alone as the Cloudflare build command; it only creates the standard Next.js output.
+`npm run build` creates only the standard Next.js output. Cloudflare Workers Builds must run `npm run build:cloudflare` as its build command so OpenNext also generates the Worker bundle. Set the deploy command to `npx wrangler deploy`; Wrangler detects the OpenNext project and invokes its deploy step. `npm run deploy` is the equivalent local build-and-deploy command. Configure `CAFE_ADMIN_PASSWORD` as a Worker secret with `wrangler secret put` or in the Worker's secret settings.
 
 ## Data and secrets
 
