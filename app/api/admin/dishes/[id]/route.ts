@@ -8,10 +8,10 @@ export const runtime = "nodejs";
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!originAllowed(request)) return NextResponse.json({ error: "Request origin was rejected." }, { status: 403 });
   const token = (await cookies()).get(sessionCookie)?.value;
-  if (!isAuthenticated(token)) return NextResponse.json({ error: "Please sign in as the chef." }, { status: 401 });
+  if (!(await isAuthenticated(token))) return NextResponse.json({ error: "Please sign in as the chef." }, { status: 401 });
   try {
     const { id } = await context.params;
-    return NextResponse.json(updateDishAvailability(id, await readJson(request)));
+    return NextResponse.json(await updateDishAvailability(id, await readJson(request)));
   } catch (error) {
     return errorResponse(error);
   }

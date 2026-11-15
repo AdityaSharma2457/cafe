@@ -7,9 +7,9 @@ export const runtime = "nodejs";
 
 export async function GET() {
   const token = (await cookies()).get(sessionCookie)?.value;
-  if (!isAuthenticated(token)) return NextResponse.json({ error: "Please sign in as the chef." }, { status: 401 });
+  if (!(await isAuthenticated(token))) return NextResponse.json({ error: "Please sign in as the chef." }, { status: 401 });
   return NextResponse.json(
-    { categories: getCategories(true) },
+    { categories: await getCategories(true) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

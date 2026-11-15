@@ -3,6 +3,9 @@ import { getCategories } from "@/lib/cafe";
 
 export const runtime = "nodejs";
 
-export function GET() {
-  return NextResponse.json({ categories: getCategories() }, { headers: { "Cache-Control": "no-store" } });
+export async function GET() {
+  return NextResponse.json(
+    { categories: await getCategories() },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

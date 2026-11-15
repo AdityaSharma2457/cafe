@@ -47,15 +47,33 @@ interface D1Database {
   batch(statements: D1PreparedStatement[]): Promise<unknown[]>;
 }
 
+interface CafeEnvironment {
+  DB?: D1Database;
+  CAFE_ADMIN_PASSWORD?: string;
+}
+
 const sessionSeconds = 8 * 60 * 60;
 
-async function database(): Promise<D1Database> {
+async function cloudflareEnvironment(): Promise<CafeEnvironment> {
   const { env } = await getCloudflareContext({ async: true });
-  const db = (env as Record<string, unknown>).DB as D1Database | undefined;
+  return env as unknown as CafeEnvironment;
+}
+
+async function database(): Promise<D1Database> {
+  const { DB } = await cloudflareEnvironment();
+  const db = DB;
   if (!db) {
     throw new Error("Cloudflare D1 binding 'DB' not found. Please bind your D1 database as 'DB'.");
   }
   return db;
+}
+
+async function adminPassword(): Promise<string> {
+  const password = (await cloudflareEnvironment()).CAFE_ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error("Cloudflare secret 'CAFE_ADMIN_PASSWORD' is not configured.");
+  }
+  return password;
 }
 
 export async function getCategories(includeUnavailable = false): Promise<Category[]> {
@@ -278,55 +296,55 @@ export async function markDelivered(idValue: string, status: unknown) {
     const exists = await db.prepare("SELECT 1 FROM orders WHERE id = ?").bind(id).first();
     if (!exists) throw new CafeError("Order not found.", 404);
     throw new CafeError("This order has already been delivered.", 409);
+  }
+  return { id, status: "delivered" };
 }
-return { id, status: "delivered" };
-}
+
 export async function updateDishAvailability(idValue: string, data: Record<string, unknown>) {
-if (!/^\d+$/.test(idValue) || Object.keys(data).length !== 1 || !("available" in data)) {
-throw new CafeError("Only dish availability can be changed here.");
+  if (!/^\d+$/.test(idValue) || Object.keys(data).length !== 1 || !("available" in data)) {
+    throw new CafeError("Only dish availability can be changed here.");
+  }
+  if (typeof data.available !== "boolean") throw new CafeError("Availability must be true or false.");
+  const id = Number(idValue);
+  const db = await database();
+  const result = await db
+    .prepare("UPDATE dishes SET available = ? WHERE id = ?")
+    .bind(Number(data.available), id)
+    .run();
+  if (result.meta.changes === 0) throw new CafeError("Dish not found.", 404);
+  return { id, available: data.available };
 }
-if (typeof data.available !== "boolean") throw new CafeError("Availability must be true or false.");
-const id = Number(idValue);
-const db = await database();
-const result = await db
-.prepare("UPDATE dishes SET available = ? WHERE id = ?")
-.bind(Number(data.available), id)
-.run();
-if (result.meta.changes === 0) throw new CafeError("Dish not found.", 404);
-return { id, available: data.available };
+
+export async function newSessionToken() {
+  const expiresAt = Date.now() + sessionSeconds * 1000;
+  const sig = createHmac("sha256", await adminPassword()).update(String(expiresAt)).digest("base64url");
+  return `${expiresAt}.${sig}`;
 }
-function getSessionSecret() {
-return process.env.CAFE_ADMIN_PASSWORD || "fallback-cafe-secret";
-}
-export function newSessionToken() {
-const expiresAt = Date.now() + sessionSeconds * 1000;
-const sig = createHmac("sha256", getSessionSecret()).update(String(expiresAt)).digest("base64url");
-return `${expiresAt}.${sig}`;
-}
+
 export function sessionDuration() {
-return sessionSeconds;
+  return sessionSeconds;
 }
-export function isAuthenticated(token: string | undefined) {
-if (!token) return false;
-const [expiresAtStr, sig] = token.split(".");
-if (!expiresAtStr || !sig) return false;
-const expiresAt = Number(expiresAtStr);
-if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return false;
-const expectedSig = createHmac("sha256", getSessionSecret()).update(expiresAtStr).digest("base64url");
-const actualBuf = Buffer.from(sig);
-const expectedBuf = Buffer.from(expectedSig);
-return actualBuf.length === expectedBuf.length && timingSafeEqual(actualBuf, expectedBuf);
+
+export async function isAuthenticated(token: string | undefined) {
+  if (!token) return false;
+  const [expiresAtStr, sig] = token.split(".");
+  if (!expiresAtStr || !sig) return false;
+  const expiresAt = Number(expiresAtStr);
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return false;
+  const expectedSig = createHmac("sha256", await adminPassword()).update(expiresAtStr).digest("base64url");
+  const actualBuf = Buffer.from(sig);
+  const expectedBuf = Buffer.from(expectedSig);
+  return actualBuf.length === expectedBuf.length && timingSafeEqual(actualBuf, expectedBuf);
 }
-export function endSession(_token?: string) {
-// Stateless signed token; clearing the cookie on the client ends the session.
+
+export async function verifyAdminPassword(password: unknown) {
+  if (typeof password !== "string") return false;
+  const expected = await adminPassword();
+  const actualHash = createHash("sha256").update(password).digest();
+  const expectedHash = createHash("sha256").update(expected).digest();
+  return timingSafeEqual(actualHash, expectedHash);
 }
-export function verifyAdminPassword(password: unknown) {
-const expected = process.env.CAFE_ADMIN_PASSWORD || "";
-if (typeof password !== "string" || expected.length === 0) return false;
-const actualHash = createHash("sha256").update(password).digest();
-const expectedHash = createHash("sha256").update(expected).digest();
-return timingSafeEqual(actualHash, expectedHash);
-}
+
 export function isSqliteConflict(error: unknown) {
-return error instanceof Error && error.message.includes("UNIQUE constraint failed");
+  return error instanceof Error && error.message.includes("UNIQUE constraint failed");
 }

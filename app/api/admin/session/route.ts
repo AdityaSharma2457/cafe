@@ -7,5 +7,8 @@ export const runtime = "nodejs";
 
 export async function GET() {
   const token = (await cookies()).get(sessionCookie)?.value;
-  return NextResponse.json({ authenticated: isAuthenticated(token) }, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(
+    { authenticated: await isAuthenticated(token) },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

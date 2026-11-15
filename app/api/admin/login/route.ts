@@ -8,10 +8,10 @@ export async function POST(request: Request) {
   if (!originAllowed(request)) return NextResponse.json({ error: "Request origin was rejected." }, { status: 403 });
   try {
     const data = await readJson(request);
-    if (!verifyAdminPassword(data.password)) {
+    if (!(await verifyAdminPassword(data.password))) {
       return NextResponse.json({ error: "Incorrect chef password." }, { status: 401 });
     }
-    const token = newSessionToken();
+    const token = await newSessionToken();
     const response = NextResponse.json({ authenticated: true });
     response.cookies.set(sessionCookie, token, {
       httpOnly: true,

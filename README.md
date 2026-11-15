@@ -1,62 +1,73 @@
 # Dishu's Cafe
 
-Dishu's Cafe is a Next.js application with a customer menu and order flow, plus
-a password-protected chef dashboard. Categories, dishes, orders, and delivery
-history are stored in SQLite. The app uses the existing `cafe.sqlite3` database
-and keeps its records; a starter menu is added only when the database has no
-categories.
+A Next.js cafe ordering app deployed to Cloudflare Workers with Cloudflare D1. Customers can browse the menu and place orders; the chef dashboard can manage dishes and orders.
 
 ## Requirements
 
-- Node.js 22.13 or newer (for the built-in `node:sqlite` module)
+- Node.js 22 or newer
 - npm
-- A private `CAFE_ADMIN_PASSWORD`
+- A Cloudflare account with Workers and D1 enabled
+- Wrangler authenticated with the Cloudflare account for remote preview or deployment
 
-## Run locally
-
-In PowerShell, from this folder:
+## Local development
 
 ```powershell
-npm install
-$env:CAFE_ADMIN_PASSWORD = "choose-a-long-private-password"
+npm ci
+Copy-Item .dev.vars.example .dev.vars
+```
+
+Edit `.dev.vars` and set a private `CAFE_ADMIN_PASSWORD`. Then apply the schema and starter menu to the local D1 database and start Next.js:
+
+```powershell
+npx wrangler d1 migrations apply cafe-db --local
 npm run dev
 ```
 
-Open <http://localhost:3000>. Choose **Chef sign in** to access the dashboard.
-For a production server, use `npm run build` followed by `npm start`; set
-`CAFE_ADMIN_PASSWORD` in the server environment rather than committing it.
+Open <http://localhost:3000>. Local D1 data is stored by Wrangler and is separate from the remote database. `npm run preview` builds the app and runs it in the Workers runtime for a production-like local check.
 
-To allow other devices on a trusted local network to connect, start the dev
-server with `npm run dev -- --hostname 0.0.0.0` and open the computer's local
-network address on those devices. For production, use HTTPS and a trusted
-reverse proxy rather than exposing the development server directly.
+## Cloudflare configuration
 
-## Configuration
+`wrangler.jsonc` configures the Worker, the D1 binding (`DB`), and the migration directory. Keep the Worker name, self-reference service name, D1 database name, binding, and database ID in sync with the Cloudflare resources. The D1 database ID in this file is an account resource identifier, not a secret.
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `CAFE_ADMIN_PASSWORD` | Required | Password for the chef dashboard |
-| `CAFE_DB_PATH` | `cafe.sqlite3` in this folder | SQLite database file |
-| `PORT` | `3000` | Next.js server port |
+Set the chef password as a Cloudflare Worker secret; do not commit it:
 
-The chef session is stored in an HTTP-only, same-site cookie and expires after
-eight hours. SQLite should be hosted on persistent storage, with one app
-instance using that database file.
+```powershell
+npx wrangler secret put CAFE_ADMIN_PASSWORD
+```
 
-## Features
+The migration in `migrations/0001_init.sql` creates the tables, indexes, and starter menu. Before applying migrations remotely, check their status:
 
-- Browse categories and available dishes, add quantities to a cart, select a
-  table, enter a name or special instructions, and submit an order.
-- Track the order's delivery status while the confirmation dialog is open.
-- Sign in as the chef to view pending orders, mark them delivered, review
-  today's delivered history and sales/order totals, and refresh the dashboard.
-- Add categories and priced dishes, then hide or show dishes without deleting
-  their order history.
-- Validate dish availability and calculate order totals on the server.
+```powershell
+npx wrangler d1 migrations list cafe-db --remote
+```
 
-Run the TypeScript check and production build with:
+Apply a migration to a new/empty production database with:
+
+```powershell
+npx wrangler d1 migrations apply cafe-db --remote
+```
+
+Do not apply the initial migration to an existing database unless Wrangler reports it as already applied or you have confirmed the schema is empty. The migration creates tables and seeds menu records; it is not a data import for an existing SQLite database. Remote migration application is intentionally a separate step from deploying the Worker.
+
+## Build and deploy
 
 ```powershell
 npm run typecheck
-npm run build
+npm run preview
+npm run deploy
 ```
+
+`npm run deploy` builds through OpenNext and deploys the Worker. If Cloudflare Workers Builds deploys this repository from Git, use `npx opennextjs-cloudflare build` as the build command and `npx wrangler deploy` as the deploy command. Configure `CAFE_ADMIN_PASSWORD` as a Worker secret with `wrangler secret put` or in the Worker's secret settings. Do not use `npm run build` alone as the Cloudflare build command; it only creates the standard Next.js output.
+
+## Data and secrets
+
+`.env*`, `.dev.vars`, Wrangler state, build output, the local SQLite database, and `data.sql` are ignored by Git. `data.sql` is a local database export and can contain customer names, notes, and order history; do not publish it. The D1 migration is the versioned schema and starter menu, not a backup. Back up production data through Cloudflare's D1 backup facilities before making database changes.
+
+The chef session is an HTTP-only, same-site cookie signed with the configured password and expires after eight hours. Use a long, unique password and HTTPS in production.
+
+## Main features
+
+- Browse categories and available dishes, build a cart, choose a table, and submit orders.
+- Track delivery status from the customer confirmation screen.
+- Sign in to the chef dashboard to manage categories and dishes, review orders, mark orders delivered, and view daily sales totals.
+- Validate dish availability and calculate order totals on the server.
