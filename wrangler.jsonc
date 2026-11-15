@@ -1,17 +1,21 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "dishus-cafe",
+  "name": "cafe",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2026-11-15",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2026-11-13",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "images": {
+    "binding": "IMAGES"
+  },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "dishus-cafe"
+      "service": "cafe",
+      "environment": "production"
     }
   ],
   "d1_databases": [
@@ -21,5 +25,10 @@
       "database_id": "7e664eaa-14b3-460c-9537-3440422f9a3d",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "observability": {
+    "enabled": true,
+    "issues": { "enabled": true },
+    "logs": { "enabled": true }
+  }
 }

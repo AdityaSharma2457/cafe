@@ -27,12 +27,12 @@ Open <http://localhost:3000>. Local D1 data is stored by Wrangler and is separat
 
 ## Cloudflare configuration
 
-`wrangler.jsonc` configures the Worker, the D1 binding (`DB`), and the migration directory. Keep the Worker name, self-reference service name, D1 database name, binding, and database ID in sync with the Cloudflare resources. The D1 database ID in this file is an account resource identifier, not a secret.
+`wrangler.jsonc` configures the existing `cafe` Worker, its production self-reference, the D1 binding (`DB`), and the migration directory. Keep these names and the database ID in sync with Cloudflare. The D1 database ID in this file is an account resource identifier, not a secret.
 
-After the first deployment creates the Worker, set the chef password as a Cloudflare Worker secret; do not commit it:
+Set or rotate the chef password as a Cloudflare Worker secret; do not put it in plain-text `vars` or commit it. The deployment log exposed the previous plain-text value, so replace it before the next deployment:
 
 ```powershell
-npx wrangler secret put CAFE_ADMIN_PASSWORD
+npx wrangler secret put CAFE_ADMIN_PASSWORD --name cafe
 ```
 
 The migration in `migrations/0001_init.sql` creates the tables, indexes, and starter menu. Before applying migrations remotely, check their status:
@@ -57,7 +57,7 @@ npm run preview
 npm run deploy
 ```
 
-`npm run build` creates only the standard Next.js output. Cloudflare Workers Builds must run `npm run build:cloudflare` as its build command so OpenNext also generates the Worker bundle. Set the deploy command to `npx wrangler deploy`; Wrangler detects the OpenNext project and invokes its deploy step. `npm run deploy` is the equivalent local build-and-deploy command. Configure `CAFE_ADMIN_PASSWORD` as a Worker secret with `wrangler secret put` or in the Worker's secret settings.
+`npm run build` creates only the standard Next.js output. In Cloudflare Workers > Settings > Builds, set the build command to `npm run build:cloudflare` so OpenNext also generates the Worker bundle. Keep the deploy command as `npx wrangler deploy`; Wrangler detects the OpenNext project and invokes its deploy step. `npm run deploy` is the equivalent local build-and-deploy command. Configure `CAFE_ADMIN_PASSWORD` as a Worker secret with `wrangler secret put` or in the Worker's secret settings.
 
 ## Data and secrets
 
